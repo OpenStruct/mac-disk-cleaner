@@ -1,0 +1,15 @@
+{
+  "intro":    "This is Mac Disk Cleaner. A free, open source app that shows you what's really filling up your Mac.",
+  "scan":     "Start by scanning your home folder. Everything stays on your computer.",
+  "summary":  "Clean up lists every folder your tools can rebuild on their own, with its real size on disk. Here, ninety nine gigabytes can go, safely.",
+  "groups":   "Each item is sorted into safe to delete, check first, or clean with a command, for things like Docker.",
+  "explore":  "Explore shows a treemap of any folder. The bigger the tile, the more space it takes.",
+  "drill":    "Click a tile to drill in. Green tiles are safe to delete.",
+  "found":    "And there it is. A forty two gigabyte Next J S cache, hiding inside one project.",
+  "select":   "Back in Clean up, select everything safe with a single click.",
+  "review":   "Before anything happens, you see exactly what will be removed.",
+  "done":     "Done. Those caches rebuild themselves the next time you need them.",
+  "largest":  "Largest files lists the biggest files on your Mac.",
+  "actions":  "Show any of them in Finder, move them to the Trash, or delete them for good.",
+  "outro":    "Install it with Homebrew, or grab it from GitHub. It's free, and it's open source."
+}

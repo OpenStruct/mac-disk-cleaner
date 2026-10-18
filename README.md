@@ -9,9 +9,9 @@
 
 [Website](https://openstruct.github.io/mac-disk-cleaner/) · [Download](https://github.com/OpenStruct/mac-disk-cleaner/releases/latest) · [Changelog](CHANGELOG.md)
 
-[![Watch the one-minute walkthrough](docs/walkthrough-poster.jpg)](https://openstruct.github.io/mac-disk-cleaner/walkthrough.mp4)
+[![Watch the narrated walkthrough](docs/walkthrough-poster.jpg)](https://openstruct.github.io/mac-disk-cleaner/walkthrough.mp4)
 
-▶ **[Watch the one-minute walkthrough](https://openstruct.github.io/mac-disk-cleaner/walkthrough.mp4)**: scan, find a 42 GB cache in the treemap, delete 99 GB of caches safely.
+▶ **[Watch the narrated walkthrough](https://openstruct.github.io/mac-disk-cleaner/walkthrough.mp4)** (80 s, sound on): scan, find a 42 GB cache in the treemap, delete 99 GB of caches safely.
 
 ## Why
 
