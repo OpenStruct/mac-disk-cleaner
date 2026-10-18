@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://openstruct.github.io/mac-disk-cleaner/sitemap.xml

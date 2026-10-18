@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mac Disk Cleaner — Free Open-Source Storage Cleaner for MacBook &amp; macOS</title>
+<meta name="description" content="Free, open-source Mac cleaner that shows exactly what's filling your MacBook's storage — hidden build caches, Xcode data, node_modules, Docker — and deletes it safely. No account, no tracking.">
+<link rel="canonical" href="https://openstruct.github.io/mac-disk-cleaner/">
+<meta name="theme-color" content="#eef2f5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12171c" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preload" href="MonaSans.woff2" as="font" type="font/woff2" crossorigin>
+
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Mac Disk Cleaner">
+<meta property="og:title" content="Mac Disk Cleaner — find what's filling your Mac">
+<meta property="og:description" content="A free, open-source disk space cleaner for macOS. Maps every folder, finds caches and build leftovers, deletes them safely.">
+<meta property="og:url" content="https://openstruct.github.io/mac-disk-cleaner/">
+<meta property="og:image" content="https://openstruct.github.io/mac-disk-cleaner/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Treemap of a Mac home folder where one hidden .next cache uses 162 GB">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Mac Disk Cleaner — find what's filling your Mac">
+<meta name="twitter:description" content="Free, open-source disk space cleaner for macOS. No account, no tracking.">
+<meta name="twitter:image" content="https://openstruct.github.io/mac-disk-cleaner/og.png">
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Mac Disk Cleaner",
+  "description": "Free, open-source disk space analyzer and cleaner for macOS. Finds build caches, Xcode data, package caches and large files, and deletes them safely.",
+  "applicationCategory": "UtilitiesApplication",
+  "operatingSystem": "macOS 12 or later",
+  "softwareVersion": "1.0.0",
+  "license": "https://opensource.org/licenses/MIT",
+  "url": "https://openstruct.github.io/mac-disk-cleaner/",
+  "downloadUrl": "https://github.com/OpenStruct/mac-disk-cleaner/releases/latest",
+  "codeRepository": "https://github.com/OpenStruct/mac-disk-cleaner",
+  "screenshot": "https://openstruct.github.io/mac-disk-cleaner/screenshot-cleanup.png",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "author": { "@type": "Organization", "name": "OpenStruct", "url": "https://github.com/OpenStruct" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "Why does my Mac say Documents is using so much space?",
+      "acceptedAnswer": { "@type": "Answer", "text": "macOS counts any file in your home folder that isn't an app, photo, music or mail as Documents. That includes hidden folders such as build caches (.next, node_modules), Xcode DerivedData and package caches, which Finder doesn't show. Mac Disk Cleaner scans those folders and adds up their real size." } },
+    { "@type": "Question", "name": "Is it safe to delete node_modules, .next or Xcode DerivedData?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. They are rebuilt automatically: npm install recreates node_modules, the next build recreates .next, and Xcode recreates DerivedData. Mac Disk Cleaner marks these as safe and marks anything that might hold your own data as check first." } },
+    { "@type": "Question", "name": "What is the best free Mac cleaner?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Look for one that shows the exact folder and size before deleting anything, explains why it's safe, and doesn't require a subscription. Mac Disk Cleaner is free and open source under the MIT license, runs entirely on your Mac, and lists every path it would remove." } },
+    { "@type": "Question", "name": "Can it clean System Data on a MacBook?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Much of what macOS reports as System Data lives in your Library folder: caches, Xcode device support files, simulators and Docker's disk image. Mac Disk Cleaner finds those. It does not touch system files outside your home folder or local Time Machine snapshots." } },
+    { "@type": "Question", "name": "Does Mac Disk Cleaner send my data anywhere?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. It runs a small server bound to 127.0.0.1 on your Mac, makes no network requests, and has no account or analytics." } },
+    { "@type": "Question", "name": "Does it work on Apple silicon MacBook Air and MacBook Pro?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Yes. It works on any Mac running macOS 12 or later, Intel or Apple silicon, using the python3 that ships with macOS." } }
+  ]
+}
+</script>
+<style>
+  @font-face { font-family: "Mona Sans"; src: url("MonaSans.woff2") format("woff2"); font-weight: 200 900; font-stretch: 75% 125%; font-display: swap; }
+  :root {
+    --canvas: #eef2f5; --surface: #ffffff; --raised: #f6f8fa;
+    --ink: #14212b; --ink-soft: #55626d; --ink-faint: #8a959e; --line: #d8dfe5;
+    --dir-1: #2c4a63; --dir-2: #36597a; --dir-3: #406890; --dir-4: #4b77a3;
+    --cache: #2f9e6e; --cache-2: #3aae7c; --file: #c98a2b; --focus: #3e8ef7;
+    --sans: "Mona Sans", -apple-system, BlinkMacSystemFont, "Helvetica Neue", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --canvas: #12171c; --surface: #1b2229; --raised: #222a32;
+      --ink: #e8eef2; --ink-soft: #a0acb5; --ink-faint: #6f7b85; --line: #2c353d;
+      --dir-1: #2a4258; --dir-2: #324f69; --dir-3: #3b5c7b; --dir-4: #45698c;
+      --cache: #2a8a61; --cache-2: #33996d; --file: #a8732a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body { margin: 0; background: var(--canvas); color: var(--ink); font: 17px/1.6 var(--sans); }
+  a { color: inherit; }
+  :focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 0 24px; }
+  .num { font-stretch: 125%; font-weight: 750; font-variant-numeric: tabular-nums; }
+
+  nav { display: flex; align-items: center; justify-content: space-between; height: 72px; }
+  .brand { display: flex; gap: 10px; align-items: center; font-weight: 700; font-stretch: 112%; text-decoration: none; }
+  .gh { display: inline-flex; gap: 8px; align-items: center; text-decoration: none; font-weight: 600; font-size: 15px;
+        padding: 8px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+  .gh:hover { border-color: var(--ink-faint); }
+
+  header { padding: 56px 0 40px; }
+  h1 { font-size: clamp(38px, 6.4vw, 76px); line-height: 1.02; letter-spacing: -0.025em; font-weight: 800; font-stretch: 116%; margin: 0; max-width: 15ch; }
+  .lede { font-size: clamp(18px, 2vw, 21px); color: var(--ink-soft); max-width: 58ch; margin: 24px 0 32px; }
+  .cta { display: flex; flex-wrap: wrap; gap: 12px; align-items: stretch; }
+  .cmd { display: flex; align-items: center; gap: 4px; min-width: 0; background: var(--ink); color: var(--canvas); border-radius: 12px; padding: 6px 6px 6px 18px;
+         font: 15px var(--mono); max-width: 100%; }
+  .cmd code { white-space: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .cmd code::-webkit-scrollbar { display: none; }
+  .cmd .p { opacity: .5; user-select: none; margin-right: 8px; }
+  .copy { flex: none; font: 600 14px var(--sans); color: var(--canvas); background: color-mix(in srgb, var(--canvas) 14%, transparent); border: 0; border-radius: 8px;
+          padding: 9px 14px; cursor: pointer; margin-left: 10px; }
+  .copy:hover { background: color-mix(in srgb, var(--canvas) 24%, transparent); }
+  .btn { display: inline-flex; align-items: center; padding: 0 20px; min-height: 50px; border-radius: 12px; font-weight: 650; text-decoration: none;
+         border: 1px solid var(--line); background: var(--surface); }
+  .btn:hover { border-color: var(--ink-faint); }
+  .fine { font-size: 14px; color: var(--ink-faint); margin-top: 14px; }
+
+  /* hero treemap */
+  .map-wrap { margin: 16px 0 0; }
+  .map-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--ink-soft); margin-bottom: 10px; }
+  .map-head b { color: var(--ink); font-size: 20px; }
+  .map { position: relative; height: clamp(360px, 46vw, 520px); border-radius: 18px; overflow: hidden; background: var(--surface); border: 1px solid var(--line); }
+  .tile { position: absolute; padding: 1.5px; }
+  .tile > div { width: 100%; height: 100%; border-radius: 8px; padding: 12px 14px; color: #fff; overflow: hidden;
+                display: flex; flex-direction: column; justify-content: space-between; }
+  .tile .n { font-weight: 650; font-size: 14px; line-height: 1.3; }
+  .tile .n small { display: block; font-weight: 500; opacity: .8; font-size: 12px; }
+  .tile .s { font-size: 15px; }
+  .tile.hero .n { font-size: 17px; } .tile.hero .s { font-size: clamp(34px, 5vw, 64px); line-height: 1; }
+  .tile.k-dir-0 > div { background: var(--dir-1); } .tile.k-dir-1 > div { background: var(--dir-2); }
+  .tile.k-dir-2 > div { background: var(--dir-3); } .tile.k-dir-3 > div { background: var(--dir-4); }
+  .tile.k-cache > div { background: var(--cache); } .tile.k-cache-2 > div { background: var(--cache-2); }
+  .tile.k-file > div { background: var(--file); }
+  .tile.k-other > div { background: repeating-linear-gradient(135deg, var(--raised) 0 6px, var(--line) 6px 7.5px); color: var(--ink-soft); }
+  .tile .s { white-space: nowrap; }
+  .tile.tiny .n { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tile.tiny .n small, .tile.tiny .s { display: none; }
+  .tile.micro .n, .tile.micro .s { display: none; }
+  .map-foot { display: flex; flex-wrap: wrap; gap: 20px; font-size: 14px; color: var(--ink-soft); margin-top: 12px; }
+  .map-foot i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+  section { padding: 88px 0 0; }
+  h2 { font-size: clamp(28px, 3.6vw, 42px); line-height: 1.1; letter-spacing: -0.02em; font-weight: 780; font-stretch: 112%; margin: 0 0 16px; max-width: 22ch; }
+  .intro { color: var(--ink-soft); max-width: 60ch; margin: 0 0 36px; }
+
+  .finds { border-top: 1px solid var(--line); }
+  .find { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2fr) 110px; gap: 24px; padding: 20px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+  .find h3 { margin: 0; font-size: 18px; font-weight: 680; }
+  .find p { margin: 0; color: var(--ink-soft); font-size: 16px; }
+  .find p code { font: 14px var(--mono); color: var(--ink); }
+  .find .tag { justify-self: end; font-size: 13px; font-weight: 650; padding: 3px 10px; border-radius: 99px; white-space: nowrap; }
+  .tag.safe { background: color-mix(in srgb, var(--cache) 16%, transparent); color: var(--cache); }
+  .tag.check { background: color-mix(in srgb, var(--file) 18%, transparent); color: var(--file); }
+  .tag.cmd2 { background: color-mix(in srgb, var(--dir-3) 18%, transparent); color: var(--dir-4); }
+  @media (prefers-color-scheme: dark) { .tag.safe { color: #6fd3a0; } .tag.check { color: #f0b65a; } .tag.cmd2 { color: #8db4dc; } }
+
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  figure { margin: 0; }
+  figure img { width: 100%; height: auto; display: block; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
+  figcaption { font-size: 15px; color: var(--ink-soft); margin-top: 12px; }
+  figcaption b { color: var(--ink); }
+
+  .safety { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 56px; border-top: 1px solid var(--line); }
+  .safety div { padding: 22px 0; border-bottom: 1px solid var(--line); }
+  .safety h3 { margin: 0 0 6px; font-size: 18px; font-weight: 680; }
+  .safety p { margin: 0; color: var(--ink-soft); font-size: 16px; }
+
+  .faq { border-top: 1px solid var(--line); max-width: 820px; }
+  details { border-bottom: 1px solid var(--line); }
+  summary { cursor: pointer; list-style: none; padding: 22px 40px 22px 0; font-size: 19px; font-weight: 650; position: relative; }
+  summary::-webkit-details-marker { display: none; }
+  summary::after { content: "+"; position: absolute; right: 4px; top: 18px; font-size: 26px; font-weight: 400; color: var(--ink-faint); transition: transform .2s; }
+  details[open] summary::after { transform: rotate(45deg); }
+  details p { margin: 0 0 22px; color: var(--ink-soft); max-width: 68ch; }
+  details code { font: 15px var(--mono); color: var(--ink); }
+
+  .end { padding: 96px 0 0; }
+  .end h2 { max-width: 18ch; }
+  footer { padding: 72px 0 40px; color: var(--ink-faint); font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; }
+
+  @media (max-width: 760px) {
+    .wrap { padding: 0 16px; }
+    header { padding-top: 24px; }
+    .find { grid-template-columns: 1fr; gap: 6px; }
+    .find .tag { justify-self: start; }
+    .shots, .safety { grid-template-columns: 1fr; }
+    section { padding-top: 64px; }
+    .cmd { font-size: 13px; flex: 1 1 100%; }
+    .cta .btn { flex: 1 1 auto; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav aria-label="Main">
+    <a class="brand" href="./" aria-label="Mac Disk Cleaner home">
+      <svg width="22" height="26" viewBox="0 0 22 26" aria-hidden="true"><rect x="5" y="0" width="12" height="3" rx="1.5" fill="currentColor"/><rect x="1" y="5" width="20" height="21" rx="5" fill="none" stroke="currentColor" stroke-width="2"/><rect x="4" y="12" width="14" height="4" fill="#2f9e6e"/><rect x="4" y="17.5" width="14" height="5.5" rx="2" fill="#406890"/></svg>
+      Mac Disk Cleaner
+    </a>
+    <a class="gh" href="https://github.com/OpenStruct/mac-disk-cleaner">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+      GitHub
+    </a>
+  </nav>
+
+  <header>
+    <h1>Your Mac says Documents uses 403&nbsp;GB. Here's where it went.</h1>
+    <p class="lede">Mac Disk Cleaner is a free, open-source app that maps every folder on your MacBook, finds the hidden caches and build leftovers eating your storage, and deletes them safely. No account, no subscription, nothing leaves your Mac.</p>
+    <div class="cta">
+      <div class="cmd"><code><span class="p">$</span>git clone https://github.com/OpenStruct/mac-disk-cleaner.git &amp;&amp; python3 mac-disk-cleaner/diskclean.py</code><button class="copy" data-copy="git clone https://github.com/OpenStruct/mac-disk-cleaner.git && python3 mac-disk-cleaner/diskclean.py">Copy</button></div>
+      <a class="btn" href="https://github.com/OpenStruct/mac-disk-cleaner/releases/latest">Download v1.0.0</a>
+    </div>
+    <p class="fine">Paste into Terminal. Works on macOS 12 or later, Intel or Apple silicon. MIT licensed.</p>
+
+    <div class="map-wrap">
+      <div class="map-head"><span>A real scan of a developer's home folder</span><b class="num">635 GB</b></div>
+      <div class="map" id="map" role="img" aria-label="Treemap of a home folder: a hidden .next build cache uses 162 GB, Docker 84 GB, Xcode device support 52 GB, Gradle 24 GB, npm cache 22 GB, Xcode DerivedData 20 GB."></div>
+      <div class="map-foot">
+        <span><i style="background:var(--cache)"></i>Safe to delete — rebuilt automatically</span>
+        <span><i style="background:var(--dir-2)"></i>Folders</span>
+        <span><i style="background:var(--file)"></i>Large files</span>
+      </div>
+    </div>
+  </header>
+
+  <section aria-labelledby="finds">
+    <h2 id="finds">It knows where macOS hides the space</h2>
+    <p class="intro">Finder doesn't show dot-folders, and macOS files most of this under “Documents” or “System Data”. Mac Disk Cleaner recognises each one, tells you what recreates it, and sorts it into safe, check first, or clean with a command.</p>
+    <div class="finds">
+      <div class="find"><h3>Build caches</h3><p><code>.next</code>, <code>.nuxt</code>, <code>.svelte-kit</code>, <code>.turbo</code>, Flutter <code>build</code>, Rust <code>target</code>. A Next.js dev cache alone can pass 150 GB.</p><span class="tag safe">safe</span></div>
+      <div class="find"><h3>Dependencies</h3><p><code>node_modules</code>, CocoaPods <code>Pods</code>, <code>.dart_tool</code>, Gradle project caches, in every project you've ever cloned.</p><span class="tag safe">safe</span></div>
+      <div class="find"><h3>Xcode</h3><p>DerivedData and iOS DeviceSupport (often 50 GB+), plus Archives and Simulators flagged for a quick check.</p><span class="tag safe">safe</span></div>
+      <div class="find"><h3>Package caches</h3><p>npm, Gradle, Go, pip, pub, and app caches in <code>~/Library/Caches</code>, re-downloaded only when needed.</p><span class="tag safe">safe</span></div>
+      <div class="find"><h3>Docker</h3><p>Images, containers and volumes inside <code>Docker.raw</code>. You get the right <code>docker system prune</code> command instead of a broken install.</p><span class="tag cmd2">command</span></div>
+      <div class="find"><h3>Things you chose to keep</h3><p>LM Studio and Hugging Face models, Android system images, Python venvs, old agent worktrees, the biggest videos in Downloads.</p><span class="tag check">check first</span></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="see">
+    <h2 id="see">See it, then clear it</h2>
+    <p class="intro">Everything is listed with its full path and size before anything is removed. Move it to the Trash if you're unsure, or delete caches permanently to get the space back immediately.</p>
+    <div class="shots">
+      <figure><img src="screenshot-cleanup.png" width="1600" height="1075" loading="lazy" alt="Clean up tab listing a 42 GB Next.js cache, 12 GB Xcode DerivedData and other safe items"><figcaption><b>Clean up.</b> One click selects every safe item; the total updates as you go.</figcaption></figure>
+      <figure><img src="screenshot-explore.png" width="1600" height="1075" loading="lazy" alt="Explore tab showing a treemap of folders sized by disk usage"><figcaption><b>Explore.</b> A treemap of any folder. Click a tile to drill in until you find the culprit.</figcaption></figure>
+    </div>
+  </section>
+
+  <section aria-labelledby="safe">
+    <h2 id="safe">Built to be trusted with your disk</h2>
+    <div class="safety">
+      <div><h3>Runs only on your Mac</h3><p>A tiny local server on 127.0.0.1. No network requests, no analytics, no account. Every request needs a token created at launch.</p></div>
+      <div><h3>Can't touch what matters</h3><p>Core folders, keychains, iCloud Drive, Mail, Messages, Photos libraries, Docker's data and <code>.git</code> folders are always refused.</p></div>
+      <div><h3>Explains every suggestion</h3><p>Each item says what it is and what rebuilds it, so you know why it's safe before you delete it.</p></div>
+      <div><h3>Small enough to read</h3><p>One Python file and one HTML file, no dependencies, MIT licensed. Audit it in an afternoon.</p></div>
+    </div>
+  </section>
+
+  <section aria-labelledby="faq">
+    <h2 id="faq">Questions</h2>
+    <div class="faq">
+      <details open><summary>Why does my Mac say Documents is using so much space?</summary>
+        <p>macOS counts any file in your home folder that isn't an app, photo, music or mail as “Documents”. That includes hidden folders like <code>.next</code>, <code>node_modules</code>, Xcode DerivedData and package caches, which Finder doesn't show. Mac Disk Cleaner scans them and adds up their real size, so a 403 GB mystery becomes a list of folders with names.</p></details>
+      <details><summary>Is it safe to delete node_modules, .next or Xcode DerivedData?</summary>
+        <p>Yes. <code>npm install</code> recreates <code>node_modules</code>, your next build recreates <code>.next</code>, and Xcode recreates DerivedData. The app marks these as safe, and marks anything that might hold your own work (archives, models, virtual environments) as check first.</p></details>
+      <details><summary>What's the best free Mac cleaner?</summary>
+        <p>Pick one that shows you the exact folder and size before deleting, explains why each item is safe, and doesn't ask for a subscription. Mac Disk Cleaner is free and open source, runs entirely on your Mac, and never removes anything you haven't seen listed.</p></details>
+      <details><summary>Can it clean “System Data” on my MacBook?</summary>
+        <p>A lot of what macOS calls System Data lives in your Library folder: caches, Xcode device support, simulators and Docker's disk image. Mac Disk Cleaner finds all of those. It doesn't touch system files outside your home folder or local Time Machine snapshots.</p></details>
+      <details><summary>I moved things to the Trash but have no more space. Why?</summary>
+        <p>Items in the Trash still use disk space until it's emptied. Use “Delete permanently” for caches, or the Empty Trash button in the app.</p></details>
+      <details><summary>Does it work on Apple silicon MacBook Air and MacBook Pro?</summary>
+        <p>Yes, on any Mac with macOS 12 or later, Intel or Apple silicon. It uses the <code>python3</code> that comes with macOS; the first run may offer to install Apple's Command Line Tools.</p></details>
+    </div>
+  </section>
+
+  <section class="end" aria-labelledby="start">
+    <h2 id="start">Find your missing gigabytes in a few minutes</h2>
+    <div class="cta">
+      <div class="cmd"><code><span class="p">$</span>git clone https://github.com/OpenStruct/mac-disk-cleaner.git &amp;&amp; python3 mac-disk-cleaner/diskclean.py</code><button class="copy" data-copy="git clone https://github.com/OpenStruct/mac-disk-cleaner.git && python3 mac-disk-cleaner/diskclean.py">Copy</button></div>
+      <a class="btn" href="https://github.com/OpenStruct/mac-disk-cleaner">Star on GitHub</a>
+    </div>
+  </section>
+
+  <footer>
+    <span>Mac Disk Cleaner 1.0.0 · MIT License · made by <a href="https://github.com/OpenStruct">OpenStruct</a></span>
+    <span><a href="https://github.com/OpenStruct/mac-disk-cleaner/issues">Report an issue</a> · <a href="https://github.com/OpenStruct/mac-disk-cleaner/blob/main/CHANGELOG.md">Changelog</a></span>
+  </footer>
+</div>
+
+<script>
+// Sample scan for the hero treemap (sizes in GB).
+const DATA = [
+  { n: "storefront/.next", d: "Next.js dev cache · safe to delete", v: 162, k: "cache", hero: true },
+  { n: "Docker", d: "Library/Containers", v: 84, k: "dir" },
+  { n: "iOS DeviceSupport", d: "Xcode · safe to delete", v: 52, k: "cache-2" },
+  { n: "Photos", d: "Documents", v: 41, k: "dir" },
+  { n: "Application Support", d: "Library", v: 38, k: "dir" },
+  { n: ".lmstudio", d: "local AI models", v: 27, k: "dir" },
+  { n: ".gradle", d: "Gradle cache · safe", v: 24, k: "cache" },
+  { n: ".npm", d: "npm cache · safe", v: 22, k: "cache-2" },
+  { n: "DerivedData", d: "Xcode · safe", v: 20, k: "cache" },
+  { n: "Library/Caches", d: "app caches", v: 29, k: "dir" },
+  { n: "go", d: "Go modules", v: 13, k: "dir" },
+  { n: "Archives", d: "Xcode", v: 11, k: "dir" },
+  { n: "macOS-installer.dmg", d: "Downloads", v: 13, k: "file" },
+  { n: "Desktop", d: "", v: 7, k: "dir" },
+  { n: "node_modules ×41", d: "safe", v: 9, k: "cache-2" },
+  { n: "Simulators", d: "Xcode", v: 9, k: "dir" },
+  { n: "everything else", d: "", v: 74, k: "other" },
+];
+
+function squarify(items, x, y, w, h) {
+  const out = [], total = items.reduce((a, i) => a + i.v, 0), scale = (w * h) / total;
+  const worst = (row, side) => { let s = 0, mx = 0, mn = Infinity; for (const i of row) { const a = i.v * scale; s += a; mx = Math.max(mx, a); mn = Math.min(mn, a); } return Math.max(side * side * mx / (s * s), (s * s) / (side * side * mn)); };
+  const place = row => {
+    const s = row.reduce((a, i) => a + i.v * scale, 0);
+    if (w >= h) { const rw = s / h; let cy = y; for (const i of row) { const ih = i.v * scale / rw; out.push({ ...i, x, y: cy, w: rw, h: ih }); cy += ih; } x += rw; w -= rw; }
+    else { const rh = s / w; let cx = x; for (const i of row) { const iw = i.v * scale / rh; out.push({ ...i, x: cx, y, w: iw, h: rh }); cx += iw; } y += rh; h -= rh; }
+  };
+  let row = [];
+  for (const it of items) { const side = Math.min(w, h); if (!row.length || worst(row, side) >= worst([...row, it], side)) row.push(it); else { place(row); row = [it]; } }
+  if (row.length) place(row);
+  return out;
+}
+
+function draw() {
+  const map = document.getElementById("map");
+  const items = DATA.filter(d => d.k !== "other").sort((a, b) => b.v - a.v).concat(DATA.filter(d => d.k === "other"));
+  let dirIdx = 0;
+  map.innerHTML = squarify(items, 0, 0, map.clientWidth, map.clientHeight).map(t => {
+    const k = t.k === "dir" ? `k-dir-${dirIdx++ % 4}` : `k-${t.k}`;
+    const sz = t.w < 70 || t.h < 50 ? " micro" : t.w < 130 || t.h < 80 ? " tiny" : "";
+    return `<div class="tile ${k}${t.hero ? " hero" : ""}${sz}" style="left:${t.x}px;top:${t.y}px;width:${t.w}px;height:${t.h}px">
+      <div><span class="n">${t.n}${t.d ? `<small>${t.d}</small>` : ""}</span><span class="s num">${t.v} GB</span></div></div>`;
+  }).join("");
+}
+new ResizeObserver(draw).observe(document.getElementById("map"));
+
+document.querySelectorAll(".copy").forEach(b => b.addEventListener("click", () => {
+  navigator.clipboard.writeText(b.dataset.copy).then(() => { b.textContent = "Copied"; setTimeout(() => b.textContent = "Copy", 1600); });
+}));
+</script>
+</body>
+</html>

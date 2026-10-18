@@ -1,0 +1,22 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest -v test_diskclean
+      - name: Server starts and serves the UI
+        run: |
+          python diskclean.py --no-open --no-scan --port 8799 &
+          sleep 2
+          curl -fsS http://127.0.0.1:8799/ | grep -q "Mac Disk Cleaner"
+          curl -fsS -o /dev/null http://127.0.0.1:8799/static/MonaSans.woff2
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8799/api/status)" = "403"
