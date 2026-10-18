@@ -9,7 +9,9 @@
 
 [Website](https://openstruct.github.io/mac-disk-cleaner/) · [Download](https://github.com/OpenStruct/mac-disk-cleaner/releases/latest) · [Changelog](CHANGELOG.md)
 
-![Clean up tab: 71 GB of caches that can be deleted safely](docs/screenshot-cleanup.png)
+[![Watch the one-minute walkthrough](docs/walkthrough-poster.jpg)](https://openstruct.github.io/mac-disk-cleaner/walkthrough.mp4)
+
+▶ **[Watch the one-minute walkthrough](https://openstruct.github.io/mac-disk-cleaner/walkthrough.mp4)**: scan, find a 42 GB cache in the treemap, delete 99 GB of caches safely.
 
 ## Why
 
@@ -27,7 +29,14 @@ No single file was big — the space was spread across hundreds of thousands of 
 
 ## Install & run
 
-Needs only the `python3` that ships with macOS (the first run may offer to install Apple's Command Line Tools).
+With [Homebrew](https://brew.sh):
+
+```bash
+brew install openstruct/tap/mac-disk-cleaner
+mac-disk-cleaner
+```
+
+Or run it straight from the source. It needs only the `python3` that ships with macOS (the first run may offer to install Apple's Command Line Tools):
 
 ```bash
 git clone https://github.com/OpenStruct/mac-disk-cleaner.git
@@ -51,6 +60,8 @@ Options: `--port 9000`, `--no-open` (don't open a browser), `--no-scan` (don't s
 - **Clean up** — every regenerable folder it found, grouped into *safe to delete*, *check first*, and *clean with a command* (for things like Docker, where deleting the folder by hand would break it). Select all safe items and free the space in one go.
 - **Explore** — a treemap of any folder, so the 162 GB tile is impossible to miss. Click to drill down; caches that are safe to delete show in green.
 - **Largest files** — the 300 biggest files, with Show in Finder, Trash and Delete on each.
+
+![Clean up tab: 71 GB of caches that can be deleted safely](docs/screenshot-cleanup.png)
 
 ![Explore tab: treemap of a developer folder](docs/screenshot-explore.png)
 

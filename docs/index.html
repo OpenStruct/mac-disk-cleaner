@@ -46,6 +46,18 @@
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": "Mac Disk Cleaner walkthrough",
+  "description": "Scan a Mac home folder, find a 42 GB Next.js cache in the treemap, and delete 99 GB of regenerable caches safely.",
+  "thumbnailUrl": "https://openstruct.github.io/mac-disk-cleaner/walkthrough-poster.jpg",
+  "contentUrl": "https://openstruct.github.io/mac-disk-cleaner/walkthrough.mp4",
+  "uploadDate": "2026-10-18",
+  "duration": "PT1M3S"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
   "@type": "FAQPage",
   "mainEntity": [
     { "@type": "Question", "name": "Why does my Mac say Documents is using so much space?",
@@ -111,7 +123,8 @@
   .btn { display: inline-flex; align-items: center; padding: 0 20px; min-height: 50px; border-radius: 12px; font-weight: 650; text-decoration: none;
          border: 1px solid var(--line); background: var(--surface); }
   .btn:hover { border-color: var(--ink-faint); }
-  .fine { font-size: 14px; color: var(--ink-faint); margin-top: 14px; }
+  .fine { font-size: 14px; color: var(--ink-faint); margin-top: 14px; max-width: 72ch; }
+  .fine code { font: 13px var(--mono); color: var(--ink-soft); overflow-wrap: anywhere; }
 
   /* hero treemap */
   .map-wrap { margin: 16px 0 0; }
@@ -152,6 +165,7 @@
   .tag.cmd2 { background: color-mix(in srgb, var(--dir-3) 18%, transparent); color: var(--dir-4); }
   @media (prefers-color-scheme: dark) { .tag.safe { color: #6fd3a0; } .tag.check { color: #f0b65a; } .tag.cmd2 { color: #8db4dc; } }
 
+  .walk { display: block; width: 100%; height: auto; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); box-shadow: 0 1px 2px rgba(20,33,43,.06), 0 12px 32px rgba(20,33,43,.08); }
   .shots { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
   figure { margin: 0; }
   figure img { width: 100%; height: auto; display: block; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); }
@@ -205,10 +219,10 @@
     <h1>Your Mac says Documents uses 403&nbsp;GB. Here's where it went.</h1>
     <p class="lede">Mac Disk Cleaner is a free, open-source app that maps every folder on your MacBook, finds the hidden caches and build leftovers eating your storage, and deletes them safely. No account, no subscription, nothing leaves your Mac.</p>
     <div class="cta">
-      <div class="cmd"><code><span class="p">$</span>git clone https://github.com/OpenStruct/mac-disk-cleaner.git &amp;&amp; python3 mac-disk-cleaner/diskclean.py</code><button class="copy" data-copy="git clone https://github.com/OpenStruct/mac-disk-cleaner.git && python3 mac-disk-cleaner/diskclean.py">Copy</button></div>
+      <div class="cmd"><code><span class="p">$</span>brew install openstruct/tap/mac-disk-cleaner &amp;&amp; mac-disk-cleaner</code><button class="copy" data-copy="brew install openstruct/tap/mac-disk-cleaner && mac-disk-cleaner">Copy</button></div>
       <a class="btn" href="https://github.com/OpenStruct/mac-disk-cleaner/releases/latest">Download v1.0.0</a>
     </div>
-    <p class="fine">Paste into Terminal. Works on macOS 12 or later, Intel or Apple silicon. MIT licensed.</p>
+    <p class="fine">Paste into Terminal. No Homebrew? <code>git clone https://github.com/OpenStruct/mac-disk-cleaner.git &amp;&amp; python3 mac-disk-cleaner/diskclean.py</code> works too. macOS 12 or later, Intel or Apple silicon. MIT licensed.</p>
 
     <div class="map-wrap">
       <div class="map-head"><span>Based on a real scan of a developer's home folder</span><b class="num">635 GB</b></div>
@@ -220,6 +234,15 @@
       </div>
     </div>
   </header>
+
+  <section aria-labelledby="watch">
+    <h2 id="watch">One minute, start to finish</h2>
+    <p class="intro">Scan, spot the 42 GB cache in the treemap, select everything safe, and delete it. This is the real app running on a demo folder.</p>
+    <video class="walk" controls playsinline preload="none" poster="walkthrough-poster.jpg" width="1440" height="900">
+      <source src="walkthrough.mp4" type="video/mp4">
+      <a href="walkthrough.mp4">Download the walkthrough video</a>
+    </video>
+  </section>
 
   <section aria-labelledby="finds">
     <h2 id="finds">It knows where macOS hides the space</h2>
@@ -274,7 +297,7 @@
   <section class="end" aria-labelledby="start">
     <h2 id="start">Find your missing gigabytes in a few minutes</h2>
     <div class="cta">
-      <div class="cmd"><code><span class="p">$</span>git clone https://github.com/OpenStruct/mac-disk-cleaner.git &amp;&amp; python3 mac-disk-cleaner/diskclean.py</code><button class="copy" data-copy="git clone https://github.com/OpenStruct/mac-disk-cleaner.git && python3 mac-disk-cleaner/diskclean.py">Copy</button></div>
+      <div class="cmd"><code><span class="p">$</span>brew install openstruct/tap/mac-disk-cleaner &amp;&amp; mac-disk-cleaner</code><button class="copy" data-copy="brew install openstruct/tap/mac-disk-cleaner && mac-disk-cleaner">Copy</button></div>
       <a class="btn" href="https://github.com/OpenStruct/mac-disk-cleaner">Star on GitHub</a>
     </div>
   </section>
